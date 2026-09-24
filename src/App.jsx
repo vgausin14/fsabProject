@@ -50,10 +50,23 @@ function Square({value, onSquareClick}) {
 }
 
 function Board({xIsNext, squares, onPlay}) {
+  const[steal, setSteal] = useState(false); 
 
   function handleClick(i){
-    if (squares[i] || calculateWinner(squares)){
+    if (calculateWinner(squares)){ //squares[i] is removed to allow for steal feature
       return;
+    }
+    else{
+      if (squares[i]){ // if true this means user is attempting a steal
+        if ((Math.random() * 10) > 5 && (!steal)){ // odds similar to 50%
+          setSteal(true); // will update text, continue with function, and remember that a steal has happened
+        }
+        else {
+          setSteal(false); //unsuccessful steal, skips turn
+          onPlay(squares.slice()); // cues the next turn with what the board has set now
+          return;
+        }
+      }
     }
 
     const nextSquares = squares.slice();
@@ -73,10 +86,11 @@ function Board({xIsNext, squares, onPlay}) {
   else {
     status = "Next player: " + (xIsNext ? "X": "O");
   }
-
+  // steal-status is something new I created in styles.css and is displayed right under status
   return (
   <>
     <div className="status">{status}</div>
+    <div className="steal-status">{steal ? "Stolen" : "Steal failed"}</div> 
     <div className="board-row">
       <Square value={squares[0]} onSquareClick={() => handleClick(0)}/>
       <Square value={squares[1]} onSquareClick={() => handleClick(1)}/>
